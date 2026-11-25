@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beat the Heat Scorekeeper</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800;900&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="bar">
+  <div class="wrap">
+    <div class="brand"><span class="pips" aria-hidden="true"><span style="background:var(--yellow)"></span><span style="background:var(--orange)"></span><span style="background:var(--red)"></span><span style="background:var(--orange)"></span></span>Kitchen Table Beat the Heat</div>
+    <nav aria-label="Sections">
+      <a href="/" data-server hidden>← Game Night home</a>
+      <a href="#standings">Standings</a>
+      <a href="#rules">Rules</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap" id="play">
+
+  <!-- 1. Setup -->
+  <section id="setup" class="setup hidden" style="border-top:0">
+    <div>
+      <div class="eyebrow">New game</div>
+      <h2>Who's playing?</h2>
+    </div>
+    <div class="field">
+      <label for="gameLabel">Game name</label>
+      <input type="text" id="gameLabel" placeholder="Saturday night" maxlength="40">
+    </div>
+    <div class="field">
+      <label>Players (2 to 10)</label>
+      <div class="namelist" id="nameList"></div>
+      <button class="btn small" id="addName" type="button">+ Add player</button>
+    </div>
+    <div class="field">
+      <label for="limit">Game ends when anyone reaches</label>
+      <select id="limit">
+        <option value="66">66 points (Take 5 / 6 nimmt! standard)</option>
+        <option value="50">50 points (shorter)</option>
+        <option value="100">100 points (longer)</option>
+      </select>
+    </div>
+    <p class="err" id="setupErr" role="alert"></p>
+    <div class="row"><button class="btn primary" id="startGame" type="button">Deal 'em</button></div>
+  </section>
+
+  <!-- 2. Game -->
+  <div id="game" class="hidden">
+    <div class="hero" style="padding-bottom:24px">
+      <div>
+        <div class="eyebrow" id="gameEyebrow"></div>
+        <h1 id="headline"></h1>
+        <p id="subline"></p>
+      </div>
+      <div class="cardstack" aria-hidden="true" id="heroCard">
+        <div class="ghost g1"></div><div class="ghost g2"></div>
+        <div class="bigcard">
+          <div class="corner tl">🔥</div><div class="center" id="heroCenter"></div><div class="corner br">🔥</div>
+          <div class="ribbon" id="heroRibbon"></div>
+        </div>
+      </div>
+    </div>
+
+    <section id="entrySection">
+      <div class="sechead">
+        <h2 id="entryTitle">Round 1</h2>
+        <p>After the round, enter the flames each player took. Lower is better.</p>
+      </div>
+      <form id="entryForm" class="entry" novalidate>
+        <div id="entryRows" class="entry"></div>
+        <p class="preview" id="preview" aria-live="polite"></p>
+        <p class="err" id="entryErr" role="alert"></p>
+        <div class="row">
+          <button class="btn primary" type="submit">Save round</button>
+          <button class="btn" type="button" id="undoBtn">Undo last round</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="overSection" class="hidden">
+      <div class="banner" id="banner"></div>
+    </section>
+
+    <section id="standings">
+      <div class="sechead">
+        <h2>Standings</h2>
+        <p id="standingsNote"></p>
+      </div>
+      <div class="podium" id="podium"></div>
+    </section>
+
+    <section id="ladderSection">
+      <div class="sechead">
+        <h2>Round by round</h2>
+        <p>Solid card: a clean round (0). Dashed card: flames taken.</p>
+      </div>
+      <div class="ladder-scroll"><div class="ladder" id="ladder"></div></div>
+    </section>
+
+    <section id="raceSection">
+      <div class="sechead">
+        <h2>Race to the target</h2>
+        <p>Running total after each round. Lower is better; the red line ends the game.</p>
+      </div>
+      <div class="chartbox">
+        <div class="keyrow" id="chartKey"></div>
+        <svg id="chart" viewBox="0 0 900 360" role="img" aria-label="Line chart of running score by round"></svg>
+      </div>
+    </section>
+
+    <section>
+      <div class="sechead"><h2>Game tools</h2><p id="toolsNote">The game saves in this browser as you go. Download the CSV to keep it for good.</p></div>
+      <div class="row">
+        <a class="btn" id="exportBtn" href="#">Download CSV</a>
+        <a class="btn" href="/" data-server hidden>All saved games</a>
+        <button class="btn danger" type="button" id="newBtn">New game</button>
+      </div>
+      <p class="empty" id="syncStatus" role="status" style="margin-top:12px"></p>
+    </section>
+  </div>
+
+  <section id="rules">
+    <div class="sechead">
+      <h2>League rules</h2>
+      <p>The quick version. Your box's rule sheet is the final word.</p>
+    </div>
+    <div class="rules">
+      <div>
+        <h3>Playing a round</h3>
+        <ol class="deal">
+          <li><strong>104 cards, numbered 1 to 104.</strong> Deal 10 to each player and start 4 rows with one face-up card each.</li>
+          <li><strong>Everyone picks a card</strong> face down at the same time, then reveals.</li>
+          <li><strong>Lowest card goes first.</strong> Each card goes at the end of the row whose last card is the closest lower number.</li>
+          <li><strong>6th card in a row?</strong> You take the first 5 cards and their flames, and your card starts the row over.</li>
+          <li><strong>Too low for every row?</strong> Take any row you choose; your card replaces it.</li>
+          <li>Play until everyone's hand is empty, then add up the flames each player took.</li>
+        </ol>
+      </div>
+      <div>
+        <h3>Scoring</h3>
+        <ul>
+          <li>Every card shows its heat in flames. The flames on the cards you take are your points for the round.</li>
+          <li><strong>Points are bad.</strong> Keep a running total.</li>
+          <li>When someone reaches the limit (66 in Take 5 / 6 nimmt!, which Beat the Heat is based on), the game ends and the <strong>lowest total wins</strong>.</li>
+          <li>If your rule sheet uses a different limit, pick it at setup.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">The official site of the Kitchen Table Beat the Heat league. A family league, not affiliated with Hasbro, which owns the Beat the Heat name.</div>
+</footer>
+
+<div class="dialog hidden" id="confirmDlg" role="dialog" aria-modal="true" aria-labelledby="confirmText">
+  <div class="panel">
+    <p id="confirmText" style="margin:0;font-weight:700"></p>
+    <div class="row"><button class="btn primary" id="confirmYes" type="button">Yes</button><button class="btn" id="confirmNo" type="button">Cancel</button></div>
+  </div>
+</div>
+<div class="toast hidden" id="toast" role="status"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
